@@ -84,6 +84,14 @@ where
         Self::default()
     }
 
+    /// Construct a cpumask with every bit set to `true`.
+    #[inline]
+    pub fn full() -> Self {
+        Self {
+            value: Bitmap::mask(SIZE),
+        }
+    }
+
     /// Construct a cpumask where every bit with index less than `bits` is
     /// `true`, and every other bit is `false`.
     #[inline]
