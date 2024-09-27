@@ -110,9 +110,9 @@ where
         }
     }
 
-    /// Construct a cpumask from a `usize` value.
+    /// Construct a cpumask from a raw `usize` value.
     /// The value must be less than `2^SIZE`, panick if the value is too large.
-    pub fn from_usize(value: usize) -> Self {
+    pub fn from_raw_bits(value: usize) -> Self {
         assert!(value >> SIZE == 0);
 
         let mut bit_map = Bitmap::new();
@@ -124,6 +124,15 @@ where
             i += 1;
         }
 
+        Self { value: bit_map }
+    }
+
+    /// Construct a cpumask with a single bit set at the specified index.
+    /// The value must be less than `SIZE`, panick if the value is too large.
+    pub fn one_shot(index: usize) -> Self {
+        assert!(index < SIZE);
+        let mut bit_map = Bitmap::new();
+        bit_map.set(index, true);
         Self { value: bit_map }
     }
 
