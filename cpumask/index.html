@@ -1,0 +1,51 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="cpumask"><title>cpumask - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-b0742ba02757f159.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="cpumask" data-themes="" data-resource-suffix="" data-rustdoc-version="1.83.0-nightly (6b9676b45 2024-10-12)" data-channel="nightly" data-search-js="search-e056c65ede92db13.js" data-settings-js="settings-805db61a62df4bd2.js" ><script src="../static.files/storage-1d39b6787ed640ff.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-f070b9041d14864c.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-0111fcff984fae8f.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../cpumask/index.html">cpumask</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#cpumask" title="cpumask">cpumask</a><ul><li><a href="#examples" title="Examples">Examples</a></li></ul></li></ul><h3><a href="#structs">Crate Items</a></h3><ul class="block"><li><a href="#structs" title="Structs">Structs</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>cpumask</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/cpumask/lib.rs.html#1-518">source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="cpumask"><a class="doc-anchor" href="#cpumask">§</a>cpumask</h2>
+<p><a href="https://crates.io/crates/cpumask"><img src="https://img.shields.io/crates/v/cpumask" alt="Crates.io" /></a>
+<a href="https://docs.rs/cpumask"><img src="https://docs.rs/cpumask/badge.svg" alt="Docs.rs" /></a>
+<a href="https://github.com/arceos-org/cpumask/actions/workflows/ci.yml"><img src="https://github.com/arceos-org/cpumask/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a></p>
+<p>CPU mask library</p>
+<p>Cpumasks provide a bitmap suitable for representing the set of CPUs in a system, one bit position per CPU number.
+In general, only nr_cpu_ids (&lt;= NR_CPUS) bits are valid.
+Refering to <code>cpumask_t</code> in Linux.
+Reference:</p>
+<ul>
+<li><a href="https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html">https://man7.org/linux/man-pages/man2/sched_setaffinity.2.html</a></li>
+<li><a href="https://man7.org/linux/man-pages/man3/CPU_SET.3.html">https://man7.org/linux/man-pages/man3/CPU_SET.3.html</a></li>
+<li><a href="https://elixir.bootlin.com/linux/v6.11/source/include/linux/cpumask_types.h">https://elixir.bootlin.com/linux/v6.11/source/include/linux/cpumask_types.h</a></li>
+</ul>
+<h3 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h3><div class="example-wrap"><pre class="language-Rust"><code>use cpumask::CpuMask;
+const SMP: usize = 32;
+
+let mut cpumask = CpuMask::&lt;SMP&gt;::new();
+
+assert!(cpumask.is_empty());
+cpumask.set(0, true);
+
+assert!(!cpumask.is_empty());
+assert!(cpumask.get(0));
+assert_eq!(cpumask.len(), 1);
+
+assert!(!cpumask.set(1, true));
+assert_eq!(cpumask.len(), 2);
+assert_eq!(cpumask.first_false_index(), Some(2));
+
+let mut oneshot = CpuMask::&lt;SMP&gt;::one_shot(SMP - 1);
+assert!(!oneshot.is_empty());
+assert!(oneshot.get(SMP - 1));
+assert_eq!(oneshot.first_index(), Some(SMP - 1));
+assert_eq!(oneshot.len(), 1);
+
+oneshot.set(0, false);
+assert!(!oneshot.is_empty());
+oneshot.set(SMP - 1, false);
+assert!(oneshot.is_empty());
+assert_eq!(oneshot.len(), 0);
+assert_eq!(oneshot.first_index(), None);
+
+let mut cpumask_full = CpuMask::&lt;SMP&gt;::full();
+assert_eq!(cpumask_full.len(), SMP);
+assert_eq!(cpumask_full.first_index(), Some(0));
+assert_eq!(cpumask_full.first_false_index(), None);
+cpumask_full.set(SMP-1, false);
+assert_eq!(cpumask_full.len(), SMP - 1);
+assert_eq!(cpumask_full.first_false_index(), Some(SMP-1));</code></pre></div></div></details><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><ul class="item-table"><li><div class="item-name"><a class="struct" href="struct.CpuMask.html" title="struct cpumask::CpuMask">CpuMask</a></div><div class="desc docblock-short">A compact array of bits which represents a set of physical CPUs,
+implemented based on <a href="https://docs.rs/bitmaps/latest/bitmaps/struct.Bitmap.html">bitmaps::Bitmap</a>.</div></li><li><div class="item-name"><a class="struct" href="struct.Iter.html" title="struct cpumask::Iter">Iter</a></div><div class="desc docblock-short">An iterator over the indices in a cpumask which are <code>true</code>.</div></li></ul></section></div></main></body></html>
